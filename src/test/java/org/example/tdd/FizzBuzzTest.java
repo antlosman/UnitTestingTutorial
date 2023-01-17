@@ -1,13 +1,14 @@
 package org.example.tdd;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class FizzBuzzTest {
@@ -55,6 +56,48 @@ public class FizzBuzzTest {
     String expected = "1";
 
     assertEquals(expected, FizzBuzz.compute(1), "Should return 1");
+  }
+
+  @ParameterizedTest(name = "value={0}, expected={1}")
+  @CsvFileSource(resources = "/small-test-data.csv")
+  @DisplayName("Testing with small data file")
+  @Order(5)
+  void testSmallDataFile(int value, String expected) {
+
+    /* Behind the scenes, JUnit will run the test multiple times and supply the data for the
+    parameters.
+     */
+
+    assertEquals(expected, FizzBuzz.compute(value));
+
+  }
+
+  @ParameterizedTest(name = "value={0}, expected={1}")
+  @CsvFileSource(resources = "/medium-test-data.csv")
+  @DisplayName("Testing with medium data file")
+  @Order(6)
+  void testMediumDataFile(int value, String expected) {
+
+    /* Behind the scenes, JUnit will run the test multiple times and supply the data for the
+    parameters.
+     */
+
+    assertEquals(expected, FizzBuzz.compute(value));
+
+  }
+
+  @ParameterizedTest(name = "value={0}, expected={1}")
+  @CsvFileSource(resources = "/large-test-data.csv")
+  @DisplayName("Testing with large data file")
+  @Order(7)
+  void testLargeDataFile(int value, String expected) {
+
+    /* Behind the scenes, JUnit will run the test multiple times and supply the data for the
+    parameters.
+     */
+
+    assertEquals(expected, FizzBuzz.compute(value));
+
   }
 
 }
