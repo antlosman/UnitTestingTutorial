@@ -1,0 +1,120 @@
+package com.springBoot.test;
+
+import com.springBoot.component.MvcTestingExampleApplication;
+import com.springBoot.component.dao.ApplicationDao;
+import com.springBoot.component.models.CollegeStudent;
+import com.springBoot.component.models.StudentGrades;
+import com.springBoot.component.service.ApplicationService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest(classes = MvcTestingExampleApplication.class)
+public class MockAnnotationTest {
+
+  @Autowired
+  ApplicationContext context;
+
+  @Autowired
+  CollegeStudent studentOne;
+
+  @Autowired
+  StudentGrades studentGrades;
+
+  //@Mock
+  @MockBean
+  private ApplicationDao applicationDao;
+
+  //@InjectMocks
+  @Autowired
+  private ApplicationService applicationService;
+
+  @BeforeEach
+  public void beforeEach() {
+    studentOne.setFirstname("Eric");
+    studentOne.setLastname("Roby");
+    studentOne.setEmailAddress("eric.roby@gmail.com");
+    studentOne.setStudentGrades(studentGrades);
+  }
+
+  @Test
+  @DisplayName("When & Verify")
+  public void assertEqualsTestAddGrades() {
+    when(applicationDao.addGradeResultsForSingleClass(
+        studentGrades.getMathGradeResults())).thenReturn(100.00);
+
+    assertEquals(100, applicationService.addGradeResultsForSingleClass(
+        studentOne.getStudentGrades().getMathGradeResults()));
+
+    verify(applicationDao).addGradeResultsForSingleClass(studentGrades.getMathGradeResults());
+
+    verify(applicationDao, times(1))
+        .addGradeResultsForSingleClass(studentGrades.getMathGradeResults());
+  }
+
+  @Test
+  @DisplayName("Find Gpa")
+  public void assertEqualsTestAddFindGpa() {
+    when(applicationDao.findGradePointAverage(studentGrades.getMathGradeResults()))
+        .thenReturn(88.31);
+
+    assertEquals(88.31, applicationService.findGradePointAverage(
+        studentOne.getStudentGrades().getMathGradeResults()));
+  }
+
+  @Test
+  @DisplayName("Not Null")
+  public void testAssertNotNull() {
+    when(applicationDao.checkNull(studentGrades.getMathGradeResults())).thenReturn(true);
+
+    assertNotNull(applicationService.checkNull(studentOne.getStudentGrades()
+        .getMathGradeResults()), "Object should not be null");
+  }
+
+
+  @Test
+  @DisplayName("Throw runtime error")
+  public void throwRuntimeError() {
+    CollegeStudent nullStudent = (CollegeStudent) context.getBean("collegeStudent");
+
+    // do throw an exception when the method is called
+    doThrow(new RuntimeException()).when(applicationDao).checkNull(nullStudent);
+
+    // assert that the exception was thrown
+    assertThrows(RuntimeException.class, () -> {
+      applicationService.checkNull(nullStudent);
+    });
+
+    // verify that the checkNull method was called 1 time
+    verify(applicationDao, times(1)).checkNull(nullStudent);
+  }
+
+  @Test
+  @DisplayName("Multiple Stubbing")
+  public void stubbingConsecutiveCalls() {
+    CollegeStudent nullStudent = (CollegeStudent) context.getBean("collegeStudent");
+
+    when(applicationDao.checkNull(nullStudent))
+        .thenThrow(new RuntimeException())
+        .thenReturn("Do not throw exception second time");
+
+    assertThrows(RuntimeException.class, () -> {
+      applicationService.checkNull(nullStudent);
+    });
+
+    assertEquals("Do not throw exception second time",
+        applicationService.checkNull(nullStudent));
+
+    verify(applicationDao, times(2)).checkNull(nullStudent);
+  }
+
+}
